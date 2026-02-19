@@ -1,7 +1,5 @@
-import io
 from rdkit import Chem
-from rdkit.Chem import Descriptors, rdMolDescriptors, Draw, QED
-from rdkit.Chem import rdDepictor
+from rdkit.Chem import rdMolDescriptors
 from dataclasses import dataclass
 from typing import Iterator, Optional
 from pathlib import Path

@@ -19,6 +19,7 @@ CREATE TABLE parameters (
   rotatable_bonds INTEGER NOT NULL,
   aromatic_rings INTEGER NOT NULL,
   heavy_atom_count INTEGER NOT NULL,
+  qed REAL NOT NULL,
 
   ro5_violation INTEGER NOT NULL, --NOT BOOLEAN; counts if how many conditions are violated
   ro5_pass INTEGER NOT NULL,
