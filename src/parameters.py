@@ -67,7 +67,7 @@ def pass_bioavailability(ro5_ok: bool, veber_ok: bool) -> bool:
     """ bioavailability filter; combines Ro5 + Veber."""
     return ro5_ok and veber_ok
 
-def compute_properties(mol: Chem.Mol) -> PropertySet:
+def compute_properties(mol: Chem.Mol) -> Parameters:
     """
     Compute RDKit 2D descriptors and screening filters;
     All values are deterministic for a given structure.
@@ -108,7 +108,7 @@ def compute_properties(mol: Chem.Mol) -> PropertySet:
     )
 
 
-def db_row(p: PropertySet) -> Dict[str, object]:
+def db_row(p: Parameters) -> Dict[str, object]:
     """Return dict compatible with compound properties columns."""
     return {
         "mw": p.molecular_weight,
