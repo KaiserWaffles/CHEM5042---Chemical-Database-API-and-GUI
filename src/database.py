@@ -62,17 +62,28 @@ def insert_properties(conn: sqlite3.Connection, compound_id: int, props: Dict[st
 
 # QUERIES
 
-def get_compounds():
+def get_compounds(conn: sqlite3.Connection) -> List[sqlite3.Row]:
     """
     Select all compounds with associated paramets
     Inner join so only compounds with calculated parameters exists
     """
-    
+    cur = conn.execute("""
+        SELECT c.compound_id, c.name, c.smiles, c.formula,
+               p.molecular_weight, p.logp, p.hbd, p.hba,
+               p.polar_surface_area, p.rotatable_bonds,
+               p.aromatic_rings, p.heavy_atom_count, p.qed,
+               p.ro5_violation, p.ro5_pass, p.ro3_pass,
+               p.leadlike_pass, p.veber_pass, p.bioavailability_pass
+        FROM compound c
+        INNER JOIN parameters p ON c.compound_id = p.compound_id
+        ORDER BY c.compound_id;
+    """)
+    return cur.fetchall()
 
-def get_compound_counts():
+def get_compound_counts(conn: sqlite3.Connection) -> int:
     """
     Get total nu ber of compounds in the database
-    library of 100 or 1,000,000+ compounds possible
+    library of 100 or 1,000,000+ compounds possibleg
     """
-
-
+    cur = conn.execute("SELECT COUNT(*) FROM compound;")
+    return cur.fetchone()
