@@ -106,3 +106,23 @@ def compute_properties(mol: Chem.Mol) -> PropertySet:
         veber_pass=int(veber_ok),
         bioavail_pass=int(bio_ok),
     )
+
+
+def db_row(p: PropertySet) -> Dict[str, object]:
+    """Return dict compatible with compound properties columns."""
+    return {
+        "mw": p.molecular_weight,
+        "logp": p.logp,
+        "hbd": p.hbd,
+        "hba": p.hba,
+        "tpsa": p.polar_surface_area,
+        "rotb": p.rotatable_bonds,
+        "rings": p.aromatic_rings,
+        "qed": p.qed,
+        "ro5_violations": p.ro5_violations,
+        "ro5_pass": p.ro5_pass,
+        "ro3_pass": p.ro3_pass,
+        "leadlike_pass": p.leadlike_pass,
+        "veber_pass": p.veber_pass,
+        "bioavail_pass": p.bioavailability_pass,
+    }
