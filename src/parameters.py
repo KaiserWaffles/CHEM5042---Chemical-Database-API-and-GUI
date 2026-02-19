@@ -125,3 +125,56 @@ def db_row(p: Parameters) -> Dict[str, object]:
         "veber_pass":   p.veber_pass,
         "bioavail_pass":    p.bioavail_pass,
     }
+
+# Filter for GUI 
+# Maps display name -> database column name for pre-computed filter flags
+FILTER_COLUMNS = {
+    "Lipinski Ro5":         "ro5_pass",
+    "Rule of 3 (Fragment)": "ro3_pass",
+    "Lead-likeness":        "leadlike_pass",
+    "Veber Rules":          "veber_pass",
+    "Bioavailability":      "bioavailability_pass",
+}
+
+FILTER_DESCRIPTIONS = {
+    "Lipinski Ro5": (
+        "Lipinski's Rule of 5 (Lipinski et al., 1997)\n"
+        "At most 1 violation of:\n"
+        "  MW  <= 500 Da\n"
+        "  LogP <= 5\n"
+        "  HBD <= 5 (sum of NH and OH)\n"
+        "  HBA <= 10 (sum of N and O)"
+    ),
+    "Rule of 3 (Fragment)": (
+        "Rule of 3 — Fragment-likeness (Congreve et al., 2003)\n"
+        "ALL must be satisfied:\n"
+        "  MW    <= 300 Da\n"
+        "  LogP  <= 3\n"
+        "  HBD   <= 3\n"
+        "  HBA   <= 3\n"
+        "  Heavy atoms < 20\n"
+        "  Rotatable bonds <= 3"
+    ),
+    "Lead-likeness": (
+        "Lead-likeness Filter\n"
+        "ALL must be satisfied:\n"
+        "  250 <= MW <= 350 Da\n"
+        "  LogP  <= 3\n"
+        "  HBD   <= 3\n"
+        "  HBA   <= 6\n"
+        "  Rotatable bonds <= 7\n"
+        "  TPSA  <= 120 A^2"
+    ),
+    "Veber Rules": (
+        "Veber's Rules (Veber et al., 2002)\n"
+        "BOTH must be satisfied:\n"
+        "  Rotatable bonds <= 10\n"
+        "  TPSA <= 140 A^2"
+    ),
+    "Bioavailability": (
+        "Bioavailability Filter (Ro5 + Veber combined)\n"
+        "Must pass BOTH:\n"
+        "  Lipinski Ro5 (<=1 violation)\n"
+        "  Veber Rules (RotB<=10, TPSA<=140)"
+    ),
+}
