@@ -4,6 +4,7 @@ from rdkit.Chem import Descriptors, rdMolDescriptors, Draw, QED
 from rdkit.Chem import rdDepictor
 from dataclasses import dataclass
 from typing import Iterator, Optional
+from pathlib import Path
 
 # Structure for RDkit
 @dataclass(frozen=True)
@@ -16,11 +17,14 @@ class ParsedMol:
 
 
 # API
-def parse_sdf(filepath: str) -> list[dict]:
-    """
-    Parse .SDF file and return a list of compound parameters dicts; Each valid compound is tidied by RDKit, properties calculated, and an optional molecular weight (MW) ceiling filter applied.  Molecules unable to be parsed or exceed MW_MAX_THRESHOLD skipped
+def extract_sdf_name(mol: Chem.Mol, fallback: str) -> str:
+    """Extract name from common SDF fields; fallback to compound name."""
+    for key in ("_Name", "Name", "ID", "CompoundID", "MOL_NAME"):
+        if mol.HasProp(key):
+            value = mol.GetProp(key).strip()
+            if value:
+                return value
+    return fallback
 
-    Returns: list[dict]
-        One dict per compound, with KEYS matching the SQLite schema
-    """
+
 
