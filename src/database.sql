@@ -1,15 +1,17 @@
---Database
-"""
-Question: How would a library of 1,000,000+ compounds affect database compared to a library of 100 instead; indexing the compound/molecule
-"""
-CREATE TABLE Compound(
+--Two tables to enable future proofing of existing compounds with multiple sets of parameters/properties
+--LOOK UP WHAT ATTRIBUTES ARE NEEDED
+CREATE TABLE compound (
+  compound_id INTEGER AUTOINCREMENT,
+  name VARCHAR (255),
+  smiles VARCHAR (255) NOT NULL UNIQUE,
+  formula VARCHAR (255),
+  PRIMARY KEY (compound_id)
+);
 
-
-
-)
-
---Do i need this or should i just make it into a single table
-CREATE TABLE Parameters(
-
-
-)
+--READ PAPERS ON WHAT GOES IN PARAMETERS
+CREATE TABLE parameters (
+  compound_id INTEGER,
+  bioavailability VARCHAR,
+  PRIMARY KEY (compound_id)
+  FOREIGN KEY (compound_id) REFERENCES compound(compound_id) ON DELETE CASCADE
+);
