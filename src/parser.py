@@ -27,4 +27,27 @@ def extract_sdf_name(mol: Chem.Mol, fallback: str) -> str:
     return fallback
 
 
+def parse_sdf(sdf_path: str | Path) -> Iterator[ParsedMol]:
+    """
+    Read molecules from an SDF file; yields ParsedMol objects;
+    Invalid records (mol is None) are skipped.
+    """
+    sdf_path = Path(sdf_path)
+    supplier = Chem.SDMolSupplier(str(sdf_path), removeHs=False)
 
+    for i, mol in enumerate(supplier, start=1):
+        if mol is None:
+            continue
+
+        name = extract_sdf_name(mol, fallback=f"comp{i}")
+
+        # SMILES is derived from structure in SDF
+        smiles = Chem.MolToSmiles(mol, isomericSmiles=True)
+
+        formula = None
+        try:
+            formula = rdMolDescriptors.CalcMolFormula(mol)
+        except Exception:
+            formula = None
+
+        yield ParsedMol(name=name, mol=mol, smiles=smiles, formula=formula)
