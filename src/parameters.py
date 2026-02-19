@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from rdkit import Chem
-from rdkit.Chem import rdMolDescriptors, QED
+from rdkit.Chem import rdMolDescriptors, QED, Lipinski, Crippen,  Descriptors
 
 # structure for RDKit
 @dataclass(frozen=True)
@@ -66,3 +66,43 @@ def pass_veber(rotb: int, tpsa: float) -> bool:
 def pass_bioavailability(ro5_ok: bool, veber_ok: bool) -> bool:
     """ bioavailability filter; combines Ro5 + Veber."""
     return ro5_ok and veber_ok
+
+def compute_properties(mol: Chem.Mol) -> PropertySet:
+    """
+    Compute RDKit 2D descriptors and screening filters;
+    All values are deterministic for a given structure.
+    """
+    mw = float(Descriptors.MolWt(mol))
+    logp = float(Crippen.MolLogP(mol))
+    hbd = int(Lipinski.NumHDonors(mol))
+    hba = int(Lipinski.NumHAcceptors(mol))
+    rotb = int(Lipinski.NumRotatableBonds(mol))
+    rings = int(rdMolDescriptors.CalcNumRings(mol))
+    tpsa = float(rdMolDescriptors.CalcTPSA(mol))
+    qed = float(QED.qed(mol))
+    hatom = int(mol.GetNumHeavyAtoms(mol))
+
+    v = ro5_violations(mw, logp, hbd, hba)
+    ro5_ok = pass_ro5(v)
+    ro3_ok = pass_ro3(mw, logp, hbd, hba, rotb, tpsa)
+    lead_ok = pass_lead_like(mw, logp, hbd, hba, rotb, tpsa)
+    veber_ok = pass_veber(rotb, tpsa)
+    bio_ok = pass_bioavailability(ro5_ok, veber_ok)
+
+    return Parameters(
+        mw=mw,
+        logp=logp,
+        hbd=hbd,
+        hba=hba,
+        tpsa=tpsa,
+        rotb=rotb,
+        rings=rings,
+        hatom=hatom,
+        qed=qed,
+        ro5_violations=v,
+        ro5_pass=int(ro5_ok),
+        ro3_pass=int(ro3_ok),
+        leadlike_pass=int(lead_ok),
+        veber_pass=int(veber_ok),
+        bioavail_pass=int(bio_ok),
+    )
