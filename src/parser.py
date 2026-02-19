@@ -2,11 +2,18 @@ import io
 from rdkit import Chem
 from rdkit.Chem import Descriptors, rdMolDescriptors, Draw, QED
 from rdkit.Chem import rdDepictor
+from dataclasses import dataclass
+from typing import Iterator, Optional
 
-# Compounds heavier than this are excluded before DB insertion.
-# Many bioactive natural products (e.g. macrolides, cyclic peptides) exceed
-# Lipinski-style limits and would distort statistical summaries.
-MW_MAX_THRESHOLD = 1000.0
+# Structure for RDkit
+@dataclass(frozen=True)
+class ParsedMol:
+    """Parsed compound record from SDF; used for description."""
+    name: str
+    mol: Chem.Mol
+    smiles: str
+    formula: Optional[str]
+
 
 # API
 def parse_sdf(filepath: str) -> list[dict]:
@@ -16,3 +23,4 @@ def parse_sdf(filepath: str) -> list[dict]:
     Returns: list[dict]
         One dict per compound, with KEYS matching the SQLite schema
     """
+
