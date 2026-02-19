@@ -18,6 +18,8 @@ class Parameters:
     # heavy atom count
     hatom: int
     qed: float
+
+    # filter results functionality
     ro5_violations: int
     ro5_pass: int
     ro3_pass: int
@@ -72,33 +74,28 @@ def compute_properties(mol: Chem.Mol) -> Parameters:
     Compute RDKit 2D descriptors and screening filters;
     All values are deterministic for a given structure.
     """
-    mw = float(Descriptors.MolWt(mol))
-    logp = float(Crippen.MolLogP(mol))
+    mw = round(float(Descriptors.MolWt(mol)), 2)
+    logp = round(float(Crippen.MolLogP(mol)), 2)
     hbd = int(Lipinski.NumHDonors(mol))
     hba = int(Lipinski.NumHAcceptors(mol))
     rotb = int(Lipinski.NumRotatableBonds(mol))
-    rings = int(rdMolDescriptors.CalcNumRings(mol))
-    tpsa = float(rdMolDescriptors.CalcTPSA(mol))
-    qed = float(QED.qed(mol))
-    hatom = int(mol.GetNumHeavyAtoms(mol))
+    rings = int(rdMolDescriptors.CalcNumAromaticRings(mol))
+    tpsa = round(float(rdMolDescriptors.CalcTPSA(mol)), 2)
+    hatom = int(mol.GetNumHeavyAtoms())       # FIX: no argument needed
+    qed_val = round(float(QED.qed(mol)), 3)
 
+    # --- Apply all filters ---
     v = ro5_violations(mw, logp, hbd, hba)
     ro5_ok = pass_ro5(v)
-    ro3_ok = pass_ro3(mw, logp, hbd, hba, rotb, tpsa)
+    ro3_ok = pass_ro3(mw, logp, hbd, hba, hatom, rotb)
     lead_ok = pass_lead_like(mw, logp, hbd, hba, rotb, tpsa)
     veber_ok = pass_veber(rotb, tpsa)
     bio_ok = pass_bioavailability(ro5_ok, veber_ok)
 
     return Parameters(
-        mw=mw,
-        logp=logp,
-        hbd=hbd,
-        hba=hba,
-        tpsa=tpsa,
-        rotb=rotb,
-        rings=rings,
-        hatom=hatom,
-        qed=qed,
+        mw=mw, logp=logp, hbd=hbd, hba=hba,
+        tpsa=tpsa, rotb=rotb, rings=rings, hatom=hatom,
+        qed=qed_val,
         ro5_violations=v,
         ro5_pass=int(ro5_ok),
         ro3_pass=int(ro3_ok),
@@ -107,22 +104,24 @@ def compute_properties(mol: Chem.Mol) -> Parameters:
         bioavail_pass=int(bio_ok),
     )
 
-
 def db_row(p: Parameters) -> Dict[str, object]:
-    """Return dict compatible with compound properties columns."""
+    """
+    convert dataclass to a  dict compatible with compound properties columns.
+    """
     return {
-        "mw": p.molecular_weight,
+        "mw":   p.mw,
         "logp": p.logp,
-        "hbd": p.hbd,
-        "hba": p.hba,
-        "tpsa": p.polar_surface_area,
-        "rotb": p.rotatable_bonds,
-        "rings": p.aromatic_rings,
-        "qed": p.qed,
-        "ro5_violations": p.ro5_violations,
+        "hbd":  p.hbd,
+        "hba":  p.hba,
+        "tpsa": p.tpsa,
+        "rotb": p.rotb,
+        "rings":    p.rings,
+        "hatom":    p.hatom,
+        "qed":  p.qed,
+        "ro5_violations":   p.ro5_violations,
         "ro5_pass": p.ro5_pass,
         "ro3_pass": p.ro3_pass,
-        "leadlike_pass": p.leadlike_pass,
-        "veber_pass": p.veber_pass,
-        "bioavail_pass": p.bioavailability_pass,
+        "leadlike_pass":    p.leadlike_pass,
+        "veber_pass":   p.veber_pass,
+        "bioavail_pass":    p.bioavail_pass,
     }
