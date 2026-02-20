@@ -103,7 +103,26 @@ class DatabaseGUI(tk.Tk):
             ttk.Button(bar, text="Load SDF File", command=self._load_sdf).pack(side=tk.LEFT, padx=5)
             ttk.Button(bar, text="Clear Database", command=self._clear_db).pack(side=tk.LEFT, padx=5)
 
-            self.lbl_count = ttk.Label(bar, text="Compounds: 0",
-                                    font=("TkDefaultFont", 10, "bold"))
+            self.lbl_count = ttk.Label(bar, text="Compounds: 0",font=("TkDefaultFont", 10, "bold"))
             self.lbl_count.pack(side=tk.RIGHT, padx=10)
 
+    def _create_filter_bar(self):
+        """
+        Filter buttons for all 5 drug discovery criteria
+        Filter pass/fail is pre-computed during import and stored in the parameters table;filtering is SQL WHERE clause
+        """
+        frame = ttk.LabelFrame(self, text="Drug Discovery Filters", padding=5)
+        frame.pack(side=tk.TOP, fill=tk.X, padx=5, pady=(0, 5))
+
+        ttk.Button(frame, text="Show All", command=self._show_all).pack(side=tk.LEFT, padx=3)
+        ttk.Separator(frame, orient=tk.VERTICAL).pack(side=tk.LEFT, fill=tk.Y, padx=5)
+
+        self.filter_buttons = {}
+        for name in FILTER_COLUMNS:
+            btn = ttk.Button(frame, text=name,
+                             command=lambda n=name: self._apply_filter(n))
+            btn.pack(side=tk.LEFT, padx=3)
+            self.filter_buttons[name] = btn
+
+        self.lbl_filter = ttk.Label(frame, text="No filter active",foreground="grey")
+        self.lbl_filter.pack(side=tk.RIGHT, padx=10)
