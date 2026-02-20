@@ -168,3 +168,8 @@ class DatabaseGUI(tk.Tk):
         self.mol_label = ttk.Label(self.mol_frame, text="Select a compound\nto view structure", anchor=tk.CENTER)
         self.mol_label.pack(fill=tk.BOTH, expand=True)
 
+    def _create_status_bar(self):
+        """Bottom status bar."""
+        self.status = ttk.Label(self, text="Ready. Load an SDF file to begin.",
+                                relief=tk.SUNKEN, anchor=tk.W, padding=3)
+        self.status.pack(side=tk.BOTTOM, fill=tk.X)
