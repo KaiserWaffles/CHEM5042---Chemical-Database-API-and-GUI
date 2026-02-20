@@ -19,7 +19,7 @@ PIL_AVAILABLE = True
 
 class DatabaseGUI(tk.Tk):
     """
-    GUI API for the Chemical Compound Database.
+    GUI API for the Chemical Compound Database; main workflow.
     Attributes:
         conn:   SQLite connection
         all_data:   list of all compound rows.
