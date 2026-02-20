@@ -447,3 +447,32 @@ class DatabaseGUI(tk.Tk):
             self.mol_label.image = photo
         except Exception as e:
             self.mol_label.config(text=f"Error: {str(e)[:50]}", image="")
+
+    # Help feature
+    def _show_filter_help(self):
+        """Show all filter criteria in a help window."""
+        win = tk.Toplevel(self)
+        win.title("Drug Discovery Filter Criteria")
+        win.geometry("520x480")
+
+        txt = tk.Text(win, wrap=tk.WORD, padx=15, pady=15, font=("Courier", 10))
+        sb = ttk.Scrollbar(win, command=txt.yview)
+        txt.configure(yscrollcommand=sb.set)
+        sb.pack(side=tk.RIGHT, fill=tk.Y)
+        txt.pack(fill=tk.BOTH, expand=True)
+
+        content = "DRUG DISCOVERY FILTER CRITERIA\n" + "=" * 42 + "\n\n"
+        for name, desc in FILTER_DESCRIPTIONS.items():
+            content += desc + "\n\n" + "-" * 42 + "\n\n"
+        content += (
+            "REFERENCES:\n"
+            "  Lipinski, \n"
+            "  Congreve, \n"
+            "  Veber \n"
+            "  Bickerton \n"
+        )
+        txt.insert(tk.END, content)
+        txt.config(state=tk.DISABLED)
+
+
+
