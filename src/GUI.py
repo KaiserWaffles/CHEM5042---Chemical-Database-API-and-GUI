@@ -260,3 +260,30 @@ class DatabaseGUI(tk.Tk):
         self.current_data = list(self.all_data)
         self._populate_table(self.current_data)
         self.lbl_count.config(text=f"Compounds: {len(self.all_data)}")
+
+    def _populate_table(self, data):
+        """Clear and fill the Treeview with data rows."""
+        for item in self.tree.get_children():
+            self.tree.delete(item)
+
+        # Only show the columns we defined (first 13 fields)
+        num_cols = len(self.COLUMNS)
+        for row in data:
+            vals = []
+            for i in range(num_cols):
+                v = row[i] if i < len(row) else ""
+                if v is None:
+                    vals.append("N/A")
+                elif isinstance(v, float):
+                    vals.append(f"{v:.2f}")
+                else:
+                    vals.append(str(v))
+            self.tree.insert("", tk.END, values=vals)
+
+        total = len(self.all_data)
+        showing = len(data)
+        if self.active_filter:
+            self.status.config(
+                text=f"Showing {showing}/{total} (Filter: {self.active_filter})")
+        else:
+            self.status.config(text=f"Showing all {showing} compounds")
