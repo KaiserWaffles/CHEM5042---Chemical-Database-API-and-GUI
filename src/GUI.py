@@ -17,7 +17,7 @@ from PIL import Image, ImageTk
 PIL_AVAILABLE = True
 
 
-class CompoundDatabaseGUI(tk.Tk):
+class DatabaseGUI(tk.Tk):
     """
     GUI API for the Chemical Compound Database.
     Attributes:
@@ -76,3 +76,22 @@ class CompoundDatabaseGUI(tk.Tk):
         # Load existing data 
         self._refresh_data()
         self.protocol("WM_DELETE_WINDOW", self._on_close)
+
+# GUI Construction
+    def _create_menu(self):
+            """Top menu bar."""
+            menubar = tk.Menu(self)
+            self.config(menu=menubar)
+
+            file_menu = tk.Menu(menubar, tearoff=0)
+            file_menu.add_command(label="Load SDF File", command=self._load_sdf)
+            file_menu.add_command(label="Clear Database", command=self._clear_db)
+            file_menu.add_separator()
+            file_menu.add_command(label="Exit", command=self._on_close)
+            menubar.add_cascade(label="File", menu=file_menu)
+
+            help_menu = tk.Menu(menubar, tearoff=0)
+            help_menu.add_command(label="Filter Criteria", command=self._show_filter_help)
+            help_menu.add_command(label="About", command=self._show_about)
+            menubar.add_cascade(label="Help", menu=help_menu)
+
