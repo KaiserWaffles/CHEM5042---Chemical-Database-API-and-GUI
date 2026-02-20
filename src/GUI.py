@@ -173,3 +173,69 @@ class DatabaseGUI(tk.Tk):
         self.status = ttk.Label(self, text="Ready. Load an SDF file to begin.",
                                 relief=tk.SUNKEN, anchor=tk.W, padding=3)
         self.status.pack(side=tk.BOTTOM, fill=tk.X)
+
+    # loading data
+    def _load_sdf(self):
+        """
+        Load an SDF file, parse, calculate parameters and store in DB parse
+            - User selects .sdf file via dialog
+            - parser.parse_sdf() reads molecules with RDKit
+            - parameters.compute_properties() calculates all parameters
+            - parameters.db_row() converts to dict for database
+            - database.insert_compound() and insert_properties() store rows
+            - GUI table refreshes
+        """
+        filepath = filedialog.askopenfilename(title="Select SDF File", filetypes=[("SDF files", "*.sdf"), ("All files", "*.*")]
+        )
+        if not filepath:
+            return
+        try:
+            self.status.config(text=f"Loading {os.path.basename(filepath)}...")
+            self.update()
+
+            # Clear existing data to avoid duplicates
+            db.clear_database(self.conn)
+
+            # Parse and import within a usage
+            count = 0
+            errors = 0
+            for mol_data in parse_sdf(filepath):
+                try:
+                    # Calculate all parameters (parameters.py)
+                    props = compute_properties(mol_data.mol)
+
+                    # Insert compound identity (database.py)
+                    cid = db.insert_compound(
+                        self.conn,
+                        name=mol_data.name,
+                        smiles=mol_data.smiles,
+                        formula=mol_data.formula
+                    )
+
+                    # Insert parameters + filter flags (database.py)
+                    db.insert_properties(self.conn, cid, db_row(props))
+                    count += 1
+
+                except Exception as e:
+                    print(f"  WARNING: Skipping {mol_data.name}: {e}")
+                    errors += 1
+
+            self.conn.commit()
+            # Refresh GUI
+            self._refresh_data()
+            self.active_filter = None
+            self.lbl_filter.config(text="No filter active", foreground="grey")
+
+            msg = f"Loaded {count} compounds from {os.path.basename(filepath)}"
+            if errors:
+                msg += f" ({errors} skipped)"
+            self.status.config(text=msg)
+            messagebox.showinfo("Import Complete", msg)
+
+        except Exception as e:
+            try:
+                self.conn.rollback()
+            except Exception:
+                pass
+            messagebox.showerror("Import Error", f"Failed:\n\n{e}")
+            self.status.config(text="Error loading file.")
