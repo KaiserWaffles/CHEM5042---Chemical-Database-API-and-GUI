@@ -287,3 +287,32 @@ class DatabaseGUI(tk.Tk):
                 text=f"Showing {showing}/{total} (Filter: {self.active_filter})")
         else:
             self.status.config(text=f"Showing all {showing} compounds")
+        
+    # Sorting feature
+    def _sort_by(self, col_name):
+        """
+        Sort table by clicked column header; click again to reverse.
+        """
+        if self.sort_column == col_name:
+            self.sort_ascending = not self.sort_ascending
+        else:
+            self.sort_column = col_name
+            self.sort_ascending = True
+
+        col_names = [c[0] for c in self.COLUMNS]
+        idx = col_names.index(col_name)
+
+        def key(row):
+            v = row[idx] if idx < len(row) else None
+            if v is None:
+                return (1, "")
+            if isinstance(v, str):
+                return (0, v.lower())
+            return (0, v)
+
+        self.current_data.sort(key=key, reverse=not self.sort_ascending)
+        self._populate_table(self.current_data)
+
+        arrow = "▲" if self.sort_ascending else "▼"
+        for cn, hdr, _ in self.COLUMNS:
+            self.tree.heading(cn, text=(hdr + arrow) if cn == col_name else hdr)
