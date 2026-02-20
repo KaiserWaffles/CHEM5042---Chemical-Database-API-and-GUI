@@ -95,3 +95,15 @@ class DatabaseGUI(tk.Tk):
             help_menu.add_command(label="About", command=self._show_about)
             menubar.add_cascade(label="Help", menu=help_menu)
 
+    def _create_toolbar(self):
+            """Toolbar with Load/Clear buttons and compound count."""
+            bar = ttk.Frame(self, padding=5)
+            bar.pack(side=tk.TOP, fill=tk.X)
+
+            ttk.Button(bar, text="Load SDF File", command=self._load_sdf).pack(side=tk.LEFT, padx=5)
+            ttk.Button(bar, text="Clear Database", command=self._clear_db).pack(side=tk.LEFT, padx=5)
+
+            self.lbl_count = ttk.Label(bar, text="Compounds: 0",
+                                    font=("TkDefaultFont", 10, "bold"))
+            self.lbl_count.pack(side=tk.RIGHT, padx=10)
+

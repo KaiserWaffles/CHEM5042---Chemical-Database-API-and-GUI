@@ -87,3 +87,14 @@ def get_compound_counts(conn: sqlite3.Connection) -> int:
     """
     cur = conn.execute("SELECT COUNT(*) FROM compound;")
     return cur.fetchone()
+
+def clear_database(conn: sqlite3.Connection) -> None:
+    """
+    Remove all data from both tables.
+
+    Deletes parameters first (child FK), then compound (parent).
+    Used before re-importing an SDF file to avoid duplicates.
+    """
+    conn.execute("DELETE FROM parameters;")
+    conn.execute("DELETE FROM compound;")
+    conn.commit()
