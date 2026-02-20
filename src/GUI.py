@@ -251,3 +251,12 @@ class DatabaseGUI(tk.Tk):
             self.active_filter = None
             self.lbl_filter.config(text="No filter active", foreground="grey")
             self.status.config(text="Database cleared.")
+        
+    def _refresh_data(self):
+        """Reload all data from database and update table."""
+        rows = db.get_all_compounds(self.conn)
+        # Convert sqlite3.Row to plain tuples for easier sorting
+        self.all_data = [tuple(r) for r in rows]
+        self.current_data = list(self.all_data)
+        self._populate_table(self.current_data)
+        self.lbl_count.config(text=f"Compounds: {len(self.all_data)}")
