@@ -316,3 +316,40 @@ class DatabaseGUI(tk.Tk):
         arrow = "▲" if self.sort_ascending else "▼"
         for cn, hdr, _ in self.COLUMNS:
             self.tree.heading(cn, text=(hdr + arrow) if cn == col_name else hdr)
+    
+    # Filtering feature
+    def _apply_filter(self, filter_name):
+        """
+        Filter compounds using pre-computed pass/fail columns.
+        Filters are calculated at import time and stored in the
+        parameters table: column check, works instantly even with 1,000,000 compounds.
+        """
+        if not self.all_data:
+            messagebox.showinfo("No Data", "Load an SDF file first.")
+            return
+
+        col = FILTER_COLUMNS[filter_name]
+
+        # Index of the filter column in our query results
+        # Query order: compound_id(0), name(1), smiles(2), formula(3),
+        #   mw(4), logp(5), hbd(6), hba(7), psa(8), rotb(9), rings(10),
+        #   hatom(11), qed(12), ro5_viol(13), ro5_pass(14), ro3_pass(15),
+        #   leadlike(16), veber(17), bioavail(18)
+        col_map = {
+            "ro5_pass": 14, "ro3_pass": 15, "leadlike_pass": 16,
+            "veber_pass": 17, "bioavailability_pass": 18,
+        }
+        idx = col_map[col]
+
+        self.current_data = [r for r in self.all_data if r[idx] == 1]
+        self.active_filter = filter_name
+
+        passed = len(self.current_data)
+        total = len(self.all_data)
+        pct = (100 * passed / total) if total > 0 else 0
+
+        self.lbl_filter.config(
+            text=f"{filter_name}: {passed}/{total} pass ({pct:.1f}%)",
+            foreground="dark green" if passed > 0 else "red"
+        )
+        self._populate_table(self.current_data)
