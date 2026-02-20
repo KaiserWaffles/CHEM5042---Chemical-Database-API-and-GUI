@@ -126,3 +126,45 @@ class DatabaseGUI(tk.Tk):
 
         self.lbl_filter = ttk.Label(frame, text="No filter active",foreground="grey")
         self.lbl_filter.pack(side=tk.RIGHT, padx=10)
+
+    def _create_main_area(self):
+        """Compound table (left) and detail panel (right)."""
+        pane = ttk.PanedWindow(self, orient=tk.HORIZONTAL)
+        pane.pack(side=tk.TOP, fill=tk.BOTH, expand=True, padx=5, pady=5)
+
+        # Table
+        tbl_frame = ttk.Frame(pane)
+        pane.add(tbl_frame, weight=3)
+
+        col_ids = [c[0] for c in self.COLUMNS]
+        self.tree = ttk.Treeview(tbl_frame, columns=col_ids, show="headings", selectmode="browse")
+        for col_name, header, width in self.COLUMNS:
+            self.tree.heading(col_name, text=header,command=lambda c=col_name: self._sort_by(c))
+            self.tree.column(col_name, width=width, minwidth=35)
+
+        vsb = ttk.Scrollbar(tbl_frame, orient=tk.VERTICAL, command=self.tree.yview)
+        hsb = ttk.Scrollbar(tbl_frame, orient=tk.HORIZONTAL, command=self.tree.xview)
+        self.tree.configure(yscrollcommand=vsb.set, xscrollcommand=hsb.set)
+        self.tree.grid(row=0, column=0, sticky="nsew")
+        vsb.grid(row=0, column=1, sticky="ns")
+        hsb.grid(row=1, column=0, sticky="ew")
+        tbl_frame.grid_rowconfigure(0, weight=1)
+        tbl_frame.grid_columnconfigure(0, weight=1)
+
+        self.tree.bind("<<TreeviewSelect>>", self._on_select)
+
+        # Detail panel
+        detail = ttk.LabelFrame(pane, text="Compound Details", padding=10)
+        pane.add(detail, weight=1)
+
+        self.detail_text = tk.Text(detail, wrap=tk.WORD, height=16, width=34, state=tk.DISABLED, font=("Courier", 10))
+        self.detail_text.pack(fill=tk.X, pady=(0, 8))
+
+        self.filter_frame = ttk.LabelFrame(detail, text="Filter Results", padding=5)
+        self.filter_frame.pack(fill=tk.X, pady=(0, 8))
+
+        self.mol_frame = ttk.LabelFrame(detail, text="2D Structure", padding=5)
+        self.mol_frame.pack(fill=tk.BOTH, expand=True)
+        self.mol_label = ttk.Label(self.mol_frame, text="Select a compound\nto view structure", anchor=tk.CENTER)
+        self.mol_label.pack(fill=tk.BOTH, expand=True)
+
