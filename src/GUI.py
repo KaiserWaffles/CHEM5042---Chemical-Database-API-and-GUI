@@ -353,3 +353,76 @@ class DatabaseGUI(tk.Tk):
             foreground="dark green" if passed > 0 else "red"
         )
         self._populate_table(self.current_data)
+
+    # Detail view feature
+    def _on_select(self, event):
+        """Show compound details + filter summary + 2D structure."""
+        sel = self.tree.selection()
+        if not sel:
+            return
+        vals = self.tree.item(sel[0])["values"]
+        if not vals:
+            return
+
+        # Find full row in cached data
+        cid = vals[0]
+        row = None
+        for r in self.all_data:
+            if str(r[0]) == str(cid):
+                row = r
+                break
+        if row is None:
+            return
+
+        # Properties text
+        self.detail_text.config(state=tk.NORMAL)
+        self.detail_text.delete("1.0", tk.END)
+
+        def fmt(v, dp=2):
+            if v is None: return "N/A"
+            if isinstance(v, float): return f"{v:.{dp}f}"
+            return str(v)
+        
+        lines = [
+            f"ID:   {row[0]}",
+            f"Name: {row[1]}",
+            f"SMILES:   {row[2]}",
+            f"Formula:  {row[3]}",
+            "-" * 35,
+            f"MW (Da):  {fmt(row[4])}",
+            f"LogP: {fmt(row[5])}",
+            f"HBD:  {row[6]}",
+            f"HBA:  {row[7]}",
+            f"PSA (A^2):    {fmt(row[8])}",
+            f"Rotatable Bonds:  {row[9]}",
+            f"Aromatic Rings:   {row[10]}",
+            f"Heavy Atoms:  {row[11]}",
+            f"QED:  {fmt(row[12], 3)}",
+            "-" * 35,
+            f"Ro5 Violations:   {row[13]}",
+        ]
+        self.detail_text.insert(tk.END, "\n".join(lines))
+        self.detail_text.config(state=tk.DISABLED)
+
+        # Filter pass/fail labels
+        for w in self.filter_frame.winfo_children():
+            w.destroy()
+
+        # row indices: ro5_pass=14, ro3=15, leadlike=16, veber=17, bioavail=18
+        filter_results = [
+            ("Lipinski Ro5",    row[14]),
+            ("Rule of 3 (Fragment)",    row[15]),
+            ("Lead-likeness",   row[16]),
+            ("Veber Rules", row[17]),
+            ("Bioavailability", row[18]),
+        ]
+        for fname, val in filter_results:
+            passed = (val == 1)
+            colour = "green" if passed else "red"
+            symbol = "PASS" if passed else "FAIL"
+            ttk.Label(self.filter_frame, text=f"  [{symbol}]  {fname}",
+                     foreground=colour).pack(anchor=tk.W, pady=1)
+        # 2D Structure
+        self._show_structure(row[2])
+
+    #
