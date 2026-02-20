@@ -1,6 +1,6 @@
 import sqlite3
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Optional, List
 
 def connect(db_path: str | Path) -> sqlite3.Connection:
     """
@@ -25,7 +25,7 @@ def insert_compound(conn: sqlite3.Connection, name: str, smiles: str, formula: O
     Insert compound identity row into the compound database table
     """
     cur = conn.execute(
-        "INSERT INTO compound(name, smiles, formula, source_file) VALUES (?, ?, ?);",
+        "INSERT INTO compound(name, smiles, formula) VALUES (?, ?, ?);",
         (name, smiles, formula),
     )
     return int(cur.lastrowid)
@@ -86,7 +86,17 @@ def get_compound_counts(conn: sqlite3.Connection) -> int:
     library of 100 or 1,000,000+ compounds possibleg
     """
     cur = conn.execute("SELECT COUNT(*) FROM compound;")
-    return cur.fetchone()
+    return int(cur.fetchone()[0])
+
+
+def get_all_compounds(conn: sqlite3.Connection) -> List[sqlite3.Row]:
+    """Backwards-compatible alias used by GUI."""
+    return get_compounds(conn)
+
+
+def get_compound_count(conn: sqlite3.Connection) -> int:
+    """Backwards-compatible alias used by GUI."""
+    return get_compound_counts(conn)
 
 def clear_database(conn: sqlite3.Connection) -> None:
     """

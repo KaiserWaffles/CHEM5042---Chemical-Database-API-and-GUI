@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Dict
 from rdkit import Chem
 from rdkit.Chem import rdMolDescriptors, QED, Lipinski, Crippen,  Descriptors
 

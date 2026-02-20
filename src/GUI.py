@@ -1,11 +1,11 @@
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 import os
-import tempfile
+import webbrowser
 
 import database as db
-from src.parameters import (compute_properties, db_row, FILTER_COLUMNS, FILTER_DESCRIPTIONS)
-from src.parser import parse_sdf
+from parameters import (compute_properties, db_row, FILTER_COLUMNS, FILTER_DESCRIPTIONS)
+from parser import parse_sdf
 
 # RDKit drawing for 2D structure images 
 from rdkit import Chem
@@ -30,7 +30,7 @@ class DatabaseGUI(tk.Tk):
     """
     # Table columns: (db_key, display_header, width)
     COLUMNS = [
-        ("compound_id", "ID",   50),
+        ("compound_id", "ID",   10),
         ("name",    "CompoundName", 120),
         ("smiles",  "SMILES",   180),
         ("formula", "Formula",  100),
@@ -157,7 +157,7 @@ class DatabaseGUI(tk.Tk):
         detail = ttk.LabelFrame(pane, text="Compound Details", padding=10)
         pane.add(detail, weight=1)
 
-        self.detail_text = tk.Text(detail, wrap=tk.WORD, height=16, width=34, state=tk.DISABLED, font=("Courier", 10))
+        self.detail_text = tk.Text(detail, wrap=tk.WORD, height=16, width=34, state=tk.DISABLED, font=("Times New Roman", 16))
         self.detail_text.pack(fill=tk.X, pady=(0, 8))
 
         self.filter_frame = ttk.LabelFrame(detail, text="Filter Results", padding=5)
@@ -354,6 +354,13 @@ class DatabaseGUI(tk.Tk):
         )
         self._populate_table(self.current_data)
 
+    def _show_all(self):
+        """Clear active filter and show all compounds."""
+        self.active_filter = None
+        self.current_data = list(self.all_data)
+        self.lbl_filter.config(text="No filter active", foreground="grey")
+        self._populate_table(self.current_data)
+
     # Detail view feature
     def _on_select(self, event):
         """Show compound details + filter summary + 2D structure."""
@@ -455,7 +462,7 @@ class DatabaseGUI(tk.Tk):
         win.title("Drug Discovery Filter Criteria")
         win.geometry("520x480")
 
-        txt = tk.Text(win, wrap=tk.WORD, padx=15, pady=15, font=("Courier", 10))
+        txt = tk.Text(win, wrap=tk.WORD, padx=15, pady=15, font=("Times New Roman", 18))
         sb = ttk.Scrollbar(win, command=txt.yview)
         txt.configure(yscrollcommand=sb.set)
         sb.pack(side=tk.RIGHT, fill=tk.Y)
@@ -465,14 +472,21 @@ class DatabaseGUI(tk.Tk):
         for name, desc in FILTER_DESCRIPTIONS.items():
             content += desc + "\n\n" + "-" * 42 + "\n\n"
         content += (
-            "REFERENCES:\n"
-            "  Lipinski, \n"
-            "  Congreve, \n"
-            "  Veber \n"
-            "  Bickerton \n"
+            "A full list of references can be obtained from the github repo: https://github.com/KaiserWaffles/CHEM5042-Chemical-Database-API-and-GUI.\n Below are the main references fro the Rule of 5, Rule of three and Veber Rule:\n"
+            " \nLipinski, C.A., Lombardo, F., Dominy, B.W. and Feeney, P.J. (1997) ‘Experimental and computational approaches to estimate solubility and permeability in drug discovery and development settings’, Advanced Drug Delivery Reviews, 23(1–3), pp. 3–25. Available at: https://doi.org/10.1016/S0169-409X(96)00423-1.\n"
+            " \nCongreve, M., Carr, R., Murray, C. and Jhoti, H. (2003) ‘A “Rule of Three” for fragment-based lead discovery?’, Drug Discovery Today, 8(19), pp. 876–877. Available at: https://doi.org/10.1016/S1359-6446(03)02831-9.\n"
+            " \nVeber, D.F., Johnson, S.R., Cheng, H.-Y., Smith, B.R., Ward, K.W. and Kopple, K.D. (2002) ‘Molecular Properties That Influence the Oral Bioavailability of Drug Candidates’, Journal of Medicinal Chemistry, 45(12), pp. 2615–2623. Available at: https://doi.org/10.1021/jm020017n.\n"
         )
         txt.insert(tk.END, content)
         txt.config(state=tk.DISABLED)
+
+    def _show_about(self):
+        """Show application info and rickroll lol"""
+        messagebox.showinfo(
+            "About",
+            "Never gonna give you up"
+        )
+        webbrowser.open("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
 
         # close app
     def _on_close(self):
