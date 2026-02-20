@@ -474,5 +474,8 @@ class DatabaseGUI(tk.Tk):
         txt.insert(tk.END, content)
         txt.config(state=tk.DISABLED)
 
-
-
+        # close app
+    def _on_close(self):
+        """Close database and exit."""
+        self.conn.close()
+        self.destroy()
