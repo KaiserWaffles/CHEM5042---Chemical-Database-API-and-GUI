@@ -239,3 +239,15 @@ class DatabaseGUI(tk.Tk):
                 pass
             messagebox.showerror("Import Error", f"Failed:\n\n{e}")
             self.status.config(text="Error loading file.")
+
+    def _clear_db(self):
+        """Clear database after confirmation."""
+        if db.get_compound_count(self.conn) == 0:
+            messagebox.showinfo("Empty", "Database is already empty.")
+            return
+        if messagebox.askyesno("Confirm", "Remove all compounds?"):
+            db.clear_database(self.conn)
+            self._refresh_data()
+            self.active_filter = None
+            self.lbl_filter.config(text="No filter active", foreground="grey")
+            self.status.config(text="Database cleared.")
