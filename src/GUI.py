@@ -425,4 +425,25 @@ class DatabaseGUI(tk.Tk):
         # 2D Structure
         self._show_structure(row[2])
 
-    #
+    # View 2D structure feature
+    def _show_structure(self, smiles):
+        """Render 2D molecular structure from SMILES."""
+        if not DRAW_AVAILABLE or not PIL_AVAILABLE:
+            self.mol_label.config(
+                text="Install RDKit + Pillow\nfor 2D structure view", image="")
+            return
+        if not smiles:
+            self.mol_label.config(text="No SMILES", image="")
+            return
+        try:
+            mol = Chem.MolFromSmiles(str(smiles))
+            if mol is None:
+                self.mol_label.config(text="Invalid SMILES", image="")
+                return
+            AllChem.Compute2DCoords(mol)
+            img = Draw.MolToImage(mol, size=(280, 280))
+            photo = ImageTk.PhotoImage(img)
+            self.mol_label.config(image=photo, text="")
+            self.mol_label.image = photo
+        except Exception as e:
+            self.mol_label.config(text=f"Error: {str(e)[:50]}", image="")
