@@ -140,7 +140,7 @@ FILTER_COLUMNS = {
 FILTER_DESCRIPTIONS = {
     "Lipinski Ro5": (
         "Lipinski's Rule of 5 (Lipinski et al., 1997)\n"
-        "At most 1 violation of:\n"
+        "At most 1 violation to remain 'drug-like':\n"
         "  Molecular Weight  <= 500 Da\n"
         "  LogP <= 5\n"
         "  Hydrogen Bond Donors <= 5 (sum of NH and OH)\n"
@@ -170,14 +170,16 @@ FILTER_DESCRIPTIONS = {
         "Veber's Rules (Veber et al., 2002)\n"
         "BOTH must be satisfied:\n"
         "  Rotatable bonds <= 10\n"
-        "  Polar Surface Area <= 140 A^2 Or 12 <= HBA + HBD"
+        "  Polar Surface Area <= 140 A^2\n"
+        "  or\n"
+        "  12 <= HBA + HBD"
     ),
     "Bioavailability": (
         "Bioavailability Filter (Ro5 + rotb, tpsa and rings)\n"
-        "Must pass BOTH:\n"
+        "Must pass all:\n"
         "  Lipinski Ro5 (<=1 violation)\n"
         "  Rotb <= 10\n"
-        "Polar Surface Area <= 200\n"
-        "Aromatic Rings <= 5"
+        "  Polar Surface Area <= 200\n"
+        "  Aromatic Rings <= 5"
     ),
 }
